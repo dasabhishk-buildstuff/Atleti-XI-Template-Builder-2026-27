@@ -57,6 +57,11 @@ export function Poster() {
         fontFamily: '"Figtree", sans-serif',
       }}
     >
+      <style>{`
+        [data-artboard] [data-player-badge] {
+          width: max-content !important;
+        }
+      `}</style>
       <SkinBackdrop
         skinId={template.id}
         tokens={tokens}
@@ -1160,6 +1165,7 @@ function PlayerNode({
       ) : null}
 
       <div
+        data-player-badge
         style={{
           position: "absolute",
           left: "50%",
@@ -1177,15 +1183,35 @@ function PlayerNode({
           fontWeight: 700,
           lineHeight: 1.05,
           letterSpacing: "0.01em",
-          whiteSpace: "nowrap",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
           pointerEvents: "none",
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          boxSizing: "border-box",
         }}
       >
-        {player ? label : "Open"}
+        <span
+          style={{
+            minWidth: 0,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {player ? label : "Open"}
+        </span>
         {player && number ? (
-          <span style={{ marginLeft: 5, fontWeight: 600, fontSize: 11, letterSpacing: "0.06em", color: "rgba(255,255,255,0.86)" }}>
+          <span
+            style={{
+              marginLeft: 5,
+              fontWeight: 600,
+              fontSize: 11,
+              letterSpacing: "0.06em",
+              color: "rgba(255,255,255,0.86)",
+              flexShrink: 0,
+              whiteSpace: "nowrap",
+            }}
+          >
             {number}
           </span>
         ) : null}
