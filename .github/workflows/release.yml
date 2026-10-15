@@ -1,0 +1,89 @@
+name: Release Pipeline
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Release Tag (e.g. v1.0.0)'
+        required: true
+        type: string
+        default: 'v1.0.0'
+      prerelease:
+        description: 'Mark as Pre-release'
+        required: false
+        type: boolean
+        default: false
+      draft:
+        description: 'Create as Draft Release'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build & Publish Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linting
+        run: npx oxlint --format github
+
+      - name: Run static type analysis
+        run: npm run typecheck
+
+      - name: Run unit tests
+        run: npm run test
+
+      - name: Build production bundle
+        run: npm run build
+
+      - name: Package release distribution archives
+        id: package
+        run: |
+          TAG="${{ inputs.tag_name || github.ref_name }}"
+          # Clean tag for filenames
+          TAG_CLEAN=$(echo "$TAG" | tr -cd '[:alnum:]._-')
+          echo "tag_clean=$TAG_CLEAN" >> "$GITHUB_OUTPUT"
+          
+          # Archive dist assets
+          cd dist
+          zip -r "../atleti-xi-studio-${TAG_CLEAN}.zip" .
+          tar -czvf "../atleti-xi-studio-${TAG_CLEAN}.tar.gz" .
+          cd ..
+          
+          # Generate SHA256 checksums
+          sha256sum "atleti-xi-studio-${TAG_CLEAN}.zip" "atleti-xi-studio-${TAG_CLEAN}.tar.gz" > SHA256SUMS.txt
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag_name || github.ref_name }}
+          name: ${{ inputs.tag_name || github.ref_name }}
+          generate_release_notes: true
+          draft: ${{ inputs.draft || false }}
+          prerelease: ${{ inputs.prerelease || false }}
+          files: |
+            atleti-xi-studio-*.zip
+            atleti-xi-studio-*.tar.gz
+            SHA256SUMS.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

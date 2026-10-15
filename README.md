@@ -25,9 +25,30 @@ npm test
 # Run linter
 npm run lint
 
+# Run static type analysis
+npm run typecheck
+
 # Production build
 npm run build
 ```
+
+---
+
+## CI/CD & Release Pipelines
+
+This repository is equipped with automated GitHub Actions workflows:
+
+1. **Continuous Integration ([`.github/workflows/ci.yml`](.github/workflows/ci.yml))**:
+   - Triggers on every push and pull request targeting `main`.
+   - Runs three dedicated, parallel verification jobs:
+     - **Lint**: Fast JavaScript/TypeScript AST linting using `oxlint`.
+     - **Static Analysis**: TypeScript compiler validation (`npm run typecheck`).
+     - **Unit Tests**: Full test suite runner using `vitest` (`npm run test`).
+   - Dependent **Build Check**: Executes `npm run build` only after linting, static analysis, and tests pass. Uploads production `dist` bundle as a build artifact for 7-day review.
+
+2. **Automated Release Pipeline ([`.github/workflows/release.yml`](.github/workflows/release.yml))**:
+   - Triggers on version tag pushes (`git tag v1.0.0 && git push origin v1.0.0`) or manual `workflow_dispatch` trigger in the GitHub UI.
+   - Runs full quality checks (lint, static analysis, unit tests), compiles production build, packages distribution bundles (`.zip` and `.tar.gz`), computes `SHA256SUMS.txt` integrity hashes, and creates a GitHub Release with auto-generated release notes.
 
 ---
 
