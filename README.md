@@ -52,6 +52,31 @@ This repository is equipped with automated GitHub Actions workflows:
 
 ---
 
+## Deployment on Vercel
+
+### Option 1: Automatic GitHub Import (Recommended)
+1. Go to [Vercel Dashboard](https://vercel.com/new).
+2. Click **Add New...** > **Project** and import `dasabhishk-buildstuff/Atleti-XI-Template-Builder-2026-27`.
+3. Vercel automatically detects the Vite preset and [`vercel.json`](vercel.json):
+   - **Framework Preset**: Vite
+   - **Build Command**: `npm run build`
+   - **Output Directory**: `dist`
+4. Click **Deploy**. Any future commits to `main` will automatically trigger a production deployment.
+
+### Option 2: Deploy with Vercel CLI
+```bash
+# Log in to Vercel
+npx vercel login
+
+# Deploy to preview
+npx vercel
+
+# Deploy directly to production
+npx vercel --prod
+```
+
+---
+
 ## Features
 
 - **Four Authored Visual Skins**:
